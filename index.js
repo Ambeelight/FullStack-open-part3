@@ -110,11 +110,6 @@ app.put("/api/persons/:id", (req, res, next) => {
         .catch((error) => next(error));
 });
 
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
-
 const unknownEndpoint = (req, res) => {
     res.status(404).send({ error: "unknown endpoint" });
 };
@@ -127,6 +122,8 @@ const errorHandler = (error, req, res, next) => {
 
     if (error.name === "CastError") {
         return res.status(400).send({ error: "malformatted id" });
+    } else if (error.name === "ValidationError") {
+        return response.status(400).json({ error: error.message });
     }
 
     next(error);
@@ -134,3 +131,8 @@ const errorHandler = (error, req, res, next) => {
 
 // handler of requests with result to errors
 app.use(errorHandler);
+
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
