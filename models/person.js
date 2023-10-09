@@ -13,8 +13,22 @@ mongoose
     });
 
 const phonebookSchema = new mongoose.Schema({
-    name: String,
-    number: String,
+    name: {
+        type: String,
+        minlength: 3,
+        required: [true, "Person name reuiqred"],
+    },
+    number: {
+        type: String,
+        validate: {
+            validator: function (v) {
+                return /^\d{2,3}-\d{7,}$/.test(v);
+            },
+            message: (props) =>
+                `${props.value} is not a valid phone number. It should be in the format XX-XXXXXXXX.`,
+        },
+        required: [true, "Person phone number required"],
+    },
 });
 
 phonebookSchema.set("toJSON", {

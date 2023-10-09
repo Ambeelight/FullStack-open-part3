@@ -7,7 +7,7 @@ const Person = require("./models/person");
 
 morgan.token("req-body", (req) => JSON.stringify(req.body));
 
-app.use(express.static("dist"));
+app.use(express.static("build"));
 app.use(express.json());
 app.use(cors());
 app.use(
@@ -69,6 +69,12 @@ app.post("/api/persons", (req, res, next) => {
         });
     }
 
+    if (!/^\d{2,3}-\d{7,}$/.test(body.number)) {
+        return res.status(400).json({
+            error: "Invalid phone number format. It should be in the format XX-XXXXXXXX or XXX-XXXXXXXX.",
+        });
+    }
+
     Person.findOne({ name: body.name })
         .then((existingPerson) => {
             if (existingPerson) {
@@ -90,7 +96,11 @@ app.post("/api/persons", (req, res, next) => {
                     );
                     res.json(savedPerson);
                 })
-                .catch((error) => next(error));
+                .catch((error) => {
+                    if (error.name === "ValidationError")
+                        return res.status(400).json({ error: error.message });
+                    next(error);
+                });
         })
         .catch((error) => next(error));
 });
